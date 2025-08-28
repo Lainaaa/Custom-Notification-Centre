@@ -15,32 +15,45 @@ import Foundation
  • `Handling` notifications
  */
 
-protocol CustomNotificatinCenterProtocol {
+protocol CustomNotificatinCenterProtocol: Sendable {
     func addObserver(observer: NSObject, name: String, completion: @escaping () -> () )
     func removeObserver(observer: NSObject, name: String)
     func post(name: String)    
 }
 
-final class CustomNotificatinCenter: CustomNotificatinCenterProtocol {
-    nonisolated(unsafe) static let shared = CustomNotificatinCenter()
+final class CustomNotificatinCenter: CustomNotificatinCenterProtocol, @unchecked Sendable {
+    static let shared = CustomNotificatinCenter()
     private init() {}
     
     /// Observers store
     private var observers: [String: [NSObject: () -> ()]] = [:]
     
+    private let queue = DispatchQueue(label: "com.example.serial")
+    
     func addObserver(observer: NSObject, name: String, completion: @escaping () -> ()) {
-        observers[name, default: [:]][observer] = completion
+        queue.sync {
+            observers[name, default: [:]][observer] = completion
+        }
     }
     
     func removeObserver(observer: NSObject, name: String) {
-        observers[name, default: [:]].removeValue(forKey: observer)
+        queue.sync {
+            _ = observers[name, default: [:]].removeValue(forKey: observer)
+        }
     }
     
     func post(name: String) {
-        guard let observerDict = observers[name] else { return }
-        
-        for (_ , value) in observerDict {
-            value()
+        var handlers: [() -> Void] = []
+        queue.sync {
+            if let dict = observers[name] {
+                handlers = Array(dict.values)
+            } else {
+                handlers = []
+            }
+        }
+        for handler in handlers {
+            handler()
         }
     }
+
 }
