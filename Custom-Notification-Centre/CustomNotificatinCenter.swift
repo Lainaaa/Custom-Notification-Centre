@@ -7,12 +7,14 @@
 
 import Foundation
 
-/*
-    `Adding` and `removing` observers
-    `Posting` notifications
-    `Handling` notifications
-*/
+/*A lightweight notification center protocol for elegant observer pattern implementation
  
+ Core functionality:
+ • `Adding` and `removing` observers  
+ • `Posting` notifications
+ • `Handling` notifications
+ */
+
 protocol CustomNotificatinCenterProtocol {
     func addObserver(observer: NSObject, name: String, completion: @escaping () -> () )
     func removeObserver(observer: NSObject, name: String)

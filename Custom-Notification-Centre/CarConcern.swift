@@ -65,9 +65,11 @@ final class Example {
         
         lidership.announceMoney()
         
-        // giving money to porsche
         porsche?.moneyReceived()
-        porsche = nil
+        
+        lidership.announceMoney()
+        
+        audi?.moneyReceived()
         
         lidership.announceMoney()
     }
